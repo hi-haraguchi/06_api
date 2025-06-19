@@ -1,0 +1,158 @@
+body {
+    font-family: 'Zen Maru Gothic', sans-serif;
+    width: 90%;
+    height: 90%;
+    margin: 0 auto;
+}
+
+h2 {
+  position: relative;
+  margin: 15px 0 30px 0;
+  padding: 10px 20px 10px 68px;
+  word-break: break-all;
+  border-top: 3px solid #444444;
+  border-radius: 12px 0 0 0;
+  font-size: 30px;
+}
+
+h2 span {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: block;
+  height:3.5rem;
+  padding: 0 20px;
+  color: #fff;
+  border-radius: 10px 0 15px 15px;
+  background: #444444;
+}
+
+
+#lending_form{
+  display: flex;
+  height: 600px;
+  gap: 30px;
+}
+
+
+#person_area{
+  width:420px;
+  height:600px;
+  display: flex;
+  flex-direction: column; /* アイテムを縦方向に並べる */
+  align-items: flex-start; /* アイテムを左揃えにする */
+  gap: 10px;
+  border-right: 1px solid lightgray;
+}
+
+#otherbook{
+  margin-top: 20px;
+}
+
+#person_condition{
+  height: 480px;
+  width: 95%;
+  /* border: 1px solid lightgray; */
+}
+
+#book_area{
+  width:420px;
+  height:600px;
+  display: flex;
+  flex-direction: column; /* アイテムを縦方向に並べる */
+  align-items: flex-start; /* アイテムを左揃えにする */
+  gap: 10px;  
+  border-right: 1px solid lightgray;
+}
+
+#book_condition{
+  height: 100px;
+  width: 95%;
+  /* border: 1px solid lightgray; */
+}
+
+#q_personnumber{
+  width: 120px;
+}
+
+#a_isbn13{
+  width : 120px;
+}
+
+.display{
+  font-size: 10px;
+}
+
+.explanation{
+  font-size: 12px;
+}
+
+#lending_area{
+  width:420px;
+  height:600px;
+  display: flex;
+  flex-direction: column; /* アイテムを縦方向に並べる */
+  align-items: flex-start; /* アイテムを左揃えにする */
+}
+
+input[type="date"] {
+  margin-top: 10px; /* 上のマージンを10pxに設定 */
+  margin-bottom: 20px; /* 下のマージンを10pxに設定 */
+}
+
+#lending_area p {
+  margin: 30px 0 0 10px;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* ここから貸出ボタンのCSS */
+#button_register {
+    background: #eee;
+    margin-top: 80px;
+    position: relative;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    width: 100px;
+    padding: 10px 25px;
+    color: #313131;
+    transition: 0.3s ease-in-out;
+    font-weight: 500;
+}
+
+#button_register::before {
+  content: '';
+  position: absolute;
+  top: -4px;
+  left: -4px;
+  width: calc(100% - 3px);
+  height: calc(100% - 3px);
+  border: 2px solid gray;
+  transition: 0.2s;
+}
+
+#button_register:hover::before {
+  top: 0;
+  left: 0;
+}
+
+#button_register:hover {
+  text-decoration: none;
+  background-color: lightgray;
+}
+
+
+
+

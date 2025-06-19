@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>もろシス　本の貸出</title>
+    <link rel="stylesheet" href="css/reset.css">
+    <link rel="stylesheet" href="css/stylesub1.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700&display=swap" rel="stylesheet"> 
+</head>
+<body>
+
+<h2><span></span>本の貸出</h2>
+
+
+<div id="lending_form">
+  <div id="person_area">
+      <label for="q_personnumber">↓利用者のバーコードを読み込んでください</label>
+      <input type="text"  id="q_personnumber">
+      <button id="display_person" class="display">表示します</button>
+      <p id="p_person">バーコードに対応した先生の名前を表示</p>
+      <p id="otherbook">↓ほかに借りている本と返却日</p>
+      <div id="person_condition"></div>
+  </div>
+
+  <div id="book_area">
+      <label for="a_isbn13">↓本のバーコードを読み込んでください</label>
+      <input type="text" inputmode="numeric" pattern="^[0-9]+$"  id="a_isbn13">
+      <p class="explanation">※読み取るバーコードは９７８からはじまるISBNです。</p>
+      <button id="display_book" class="display">表示します</button>
+      <div id="book_condition"></div>
+      <p>※登録している本の番号（入力すれば情報が出てきます）<br>
+        9784088827827<br>
+        9784087457483<br>
+        9784041131350<br>
+        9784167791018<br>
+        9784022650597<br>
+        9784103549512<br>
+        9784811808604<br>
+        9784867320068<br>
+        9784087213126<br>
+        9784865813753  
+      </p>
+
+  </div>
+
+  <div id="lending_area">
+    <label for="x_lendingday">貸出日</label><input type="date" id="x_lendingday">
+    <label for="y_returnday">返却期限 </label><input type="date" id="y_returnday">
+    <p>①利用者があっているか確認してください。</p>
+    <p>②利用者の借りている本の冊数が上限を超えていないか<br>確認してください。</p>
+    <p>③貸し出す本の情報があっているか確認してください。</p>
+    <p>③貸出日と返却期限を入力してください。</p>
+    <div id="button_register">貸出します！</div>
+  </div>
+
+</div>
+
+
+
+
+
+
+    
+
+
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+
+
+
+<script type="module">
+  // Import the functions you need from the SDKs you need
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
+  // TODO: Add SDKs for Firebase products that you want to use
+  // https://firebase.google.com/docs/web/setup#available-libraries
+
+  import {
+  getFirestore,
+  collection,
+  addDoc,
+  serverTimestamp,
+  onSnapshot,
+  query,
+  where,
+  getDocs,
+  doc,
+  updateDoc
+} from "https://www.gstatic.com/firebasejs/11.9.1/firebase-firestore.js";
+
+
+  // Your web app's Firebase configuration
+  const firebaseConfig = {
+    
+    authDomain: "librarysystem20250619.firebaseapp.com",
+    projectId: "librarysystem20250619",
+    storageBucket: "librarysystem20250619.firebasestorage.app",
+    messagingSenderId: "192501400015",
+    appId: "1:192501400015:web:6ff338b2079e4564da52ba"
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+
+  const db = getFirestore(app);
+
+
+
+  // 「Firestore 形式のデータ」を入力して「配列形式のデータ」を出力する関数を追加する
+function Documents(fireStoreDocs) {
+  const documents = [];
+  fireStoreDocs.forEach(function (doc) {
+    const document = {
+      id: doc.id,
+      data: doc.data(),
+    };
+    documents.push(document);
+  });
+  return documents;
+}
+
+
+
+
+
+
+// 「配列形式にしたチャットのデータ」を入力して「表示用のタグにいれて」出力する関数を追加する
+function bookElements(Documents) {
+  const elements = [];
+  Documents.forEach(function (document) {
+    elements.push(`
+        <p>${document.data.b_booktitle}</p>
+        <p>${document.data.c_bookauthor}</p>
+    `);
+  });
+  return elements;
+}
+
+function personElements(Documents) {
+  const elements = [];
+  Documents.forEach(function (document) {
+    elements.push(`
+        <p>${document.data.p_person}</p>
+    `);
+  });
+  return elements;
+}
+
+function personlendingElements(Documents) {
+  const elements = [];
+  Documents.forEach(function (document) {
+    elements.push(`
+      <li id="${document.id}">
+        <p>${document.data.a_isbn13}</p>
+        <p>${document.data.y_returnday}</p>
+      </li>
+    `);
+  });
+  return elements;
+}
+
+
+
+
+
+//  ページ開いたらカーソルが合うように
+ $(document).ready(function() {
+   $('#q_personnumber').focus();
+ });
+
+
+
+//  人のバーコードの入力してボタンを押したときの挙動
+$("#display_person").on("click", function () {
+  // #q_personnumber の現在の値を取得
+  const inputPersonNumber = $('#q_personnumber').val();
+
+  onSnapshot(collection(db, "person"), (querySnapshot) => {
+    const allDocuments = Documents(querySnapshot.docs);
+    console.log("全てのドキュメント:", allDocuments);
+
+    // q_personnumber が inputPersonNumber と一致するドキュメントをフィルタリング
+    const filteredDocuments = allDocuments.filter(doc => {
+      return doc.data.q_personnumber === inputPersonNumber;
+    });
+
+    console.log("フィルタリングされたドキュメント:", filteredDocuments);
+
+    // フィルタリングされたドキュメントを使って表示を更新
+    const elements = personElements(filteredDocuments);
+    $("#p_person").html(elements);
+  });
+
+
+  onSnapshot(collection(db, "lending"), (querySnapshot) => {
+    const allDocuments = Documents(querySnapshot.docs);
+    console.log("全てのドキュメント:", allDocuments);
+
+    // q_personnumber が inputPersonNumber と一致するドキュメントをフィルタリング
+    const filteredDocuments = allDocuments.filter(doc => {
+      return doc.data.q_personnumber === inputPersonNumber;
+    });
+
+    console.log("フィルタリングされたドキュメント:", filteredDocuments);
+
+    // フィルタリングされたドキュメントを使って表示を更新
+    const elements = personlendingElements(filteredDocuments);
+    $("#person_condition").html(elements);
+  });
+
+
+});
+
+
+
+//  本のバーコードの入力してボタンを押したときの挙動
+$("#display_book").on("click", function () {
+  // #a_isbn13 の現在の値を取得
+  const inputIsbn13 = $('#a_isbn13').val(); // inputIdをa_isbn13に変更
+
+  onSnapshot(collection(db, "book"), (querySnapshot) => {
+    console.log(querySnapshot.docs);
+
+    const allDocuments = Documents(querySnapshot.docs);
+    console.log("全てのドキュメント (本):", allDocuments);
+
+    // a_isbn13 が inputIsbn13 と一致するドキュメントをフィルタリング
+    const filteredDocuments = allDocuments.filter(doc => {
+      // doc.data.a_isbn13 が文字列としてinputIsbn13と一致するかを確認
+      // 必要に応じて型変換（例: String()）を行うとより安全です
+      return String(doc.data.a_isbn13) === String(inputIsbn13);
+    });
+
+    console.log("フィルタリングされたドキュメント (本):", filteredDocuments);
+
+    // フィルタリングされたドキュメントを使って表示を更新
+    const elements = bookElements(filteredDocuments);
+    $("#book_condition").html(elements);
+  });
+});
+
+
+
+
+
+// 貸出ボタンを押したときの挙動
+// firebaseに登録
+// bookで、最後に借りた人として登録
+// 入力欄をクリア
+// 修正後
+$("#button_register").on("click", async function () { // ここに async を追加！
+
+
+// firebaseに送るところ
+const postData = {
+  a_isbn13: $("#a_isbn13").val(),
+  q_personnumber: $("#q_personnumber").val(),
+  x_lendingday: $("#x_lendingday").val(),
+  y_returnday: $("#y_returnday").val(),
+};
+
+
+addDoc(collection(db, "lending"), postData);
+
+
+// const inputIsbn13 = $('#a_isbn13').val();
+// const inputPersonNumber = $('#q_personnumber').val();
+
+//   try {
+//     // 1. a_isbn13が一致する本を検索
+//     const booksRef = collection(db, "book");
+//     const q = query(booksRef, where("a_isbn13", "==", inputIsbn13));
+//     const querySnapshot = await getDocs(q); // ここに await があります
+
+
+//     // 2. 見つかった各ドキュメントを更新
+//     // forEach のコールバック関数も非同期なので async をつける
+//     // ただし、forEach 内で await すると並列で実行されないので注意。
+//     // 全ての更新が完了するのを待ちたい場合は Promise.all などを使うのがより良いですが、
+//     // 今回のケースではこれで動きます。
+//     querySnapshot.forEach(async (document) => { 
+//       const docRef = doc(db, "book", document.id);
+        
+//       await updateDoc(docRef, { 
+//         k_lastperson: inputPersonNumber
+//       });
+//     });
+
+//     // tryブロックに catchを追加する必要があります
+//   } catch (error) {
+//       console.error("更新中にエラーが発生しました:", error);
+//       alert("処理中にエラーが発生しました。");
+//   }
+    
+
+// 入力データをクリア
+$("#a_isbn13").val("");
+$("#q_personnumber").val("");
+$("#x_lendingday").val("");
+$("#y_returnday").val("");
+$("#p_person").html("");
+$("#book_condition").html("");
+
+alert("貸出登録しました");
+
+});
+
+
+</script>
+
+
+
+
+
+
+</body>
+</html>

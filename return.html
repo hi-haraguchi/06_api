@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>もろシス　本の返却</title>
+    <link rel="stylesheet" href="css/reset.css">
+    <link rel="stylesheet" href="css/stylesub2.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700&display=swap" rel="stylesheet"> 
+</head>
+<body>
+
+<h2><span></span>本の返却</h2>
+
+<div id="return_form">
+
+
+  <div id="book_area">
+      <label for="a_isbn13">↓本のバーコードを読み込んでください</label>
+      <input type="text" inputmode="numeric" pattern="^[0-9]+$"  id="a_isbn13">
+      <p class="explanation">※読み取るバーコードは９７８からはじまるISBNです。</p>
+      <button id="display_book" class="display">表示します</button>
+      <div id="book_condition"></div>
+  </div>
+
+  <div id="return_area">
+    <p>借りていた人と返却期日</p>
+    <div id="return_display"></div>
+
+  
+
+    <p class="return_p">返却日を超えていないか確認してください。</p>
+    <p class="return_p">遅れる常習犯には、適宜注意をお願いします。</p>
+    <div id="button_register">返却します！</div>
+  </div>
+
+</div>
+
+
+
+
+
+
+    
+
+
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+
+
+
+<script type="module">
+  // Import the functions you need from the SDKs you need
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
+  // TODO: Add SDKs for Firebase products that you want to use
+  // https://firebase.google.com/docs/web/setup#available-libraries
+
+  import {
+  getFirestore,
+  collection,
+  addDoc,
+  serverTimestamp,
+  onSnapshot,
+  query,
+  where,
+  getDocs,
+  doc,
+  updateDoc,
+  deleteDoc
+} from "https://www.gstatic.com/firebasejs/11.9.1/firebase-firestore.js";
+
+
+  // Your web app's Firebase configuration
+  const firebaseConfig = {
+    
+    authDomain: "librarysystem20250619.firebaseapp.com",
+    projectId: "librarysystem20250619",
+    storageBucket: "librarysystem20250619.firebasestorage.app",
+    messagingSenderId: "192501400015",
+    appId: "1:192501400015:web:6ff338b2079e4564da52ba"
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+
+  const db = getFirestore(app);
+
+
+
+  // 「Firestore 形式のデータ」を入力して「配列形式のデータ」を出力する関数を追加する
+function Documents(fireStoreDocs) {
+  const documents = [];
+  fireStoreDocs.forEach(function (doc) {
+    const document = {
+      id: doc.id,
+      data: doc.data(),
+    };
+    documents.push(document);
+  });
+  return documents;
+}
+
+
+// 「配列形式にしたチャットのデータ」を入力して「表示用のタグにいれて」出力する関数を追加する
+function bookElements(Documents) {
+  const elements = [];
+  Documents.forEach(function (document) {
+    elements.push(`
+        <p>${document.data.b_booktitle}</p>
+        <p>${document.data.c_bookauthor}</p>
+    `);
+  });
+  return elements;
+}
+
+function returnElements(Documents) {
+  const elements = [];
+  Documents.forEach(function (document) {
+    elements.push(`
+        <p>${document.data.q_personnumber}</p>
+        <p>${document.data.y_returnday}</p>
+    `);
+  });
+  return elements;
+}
+
+
+
+
+
+//  ページ開いたらカーソルが合うように
+ $(document).ready(function() {
+   $('#a_isbn13').focus();
+ });
+
+
+
+//  本のバーコードの入力してボタンを押したときの挙動
+// 本のタイトルを表示
+// firebaseのlendingから、その本を借りている、人と期日を呼び出して表示
+
+$("#display_book").on("click", function () {
+  // #a_isbn13 の現在の値を取得
+  const inputIsbn13 = $('#a_isbn13').val(); // inputIdをa_isbn13に変更
+
+  onSnapshot(collection(db, "book"), (querySnapshot) => {
+    console.log(querySnapshot.docs);
+
+    const allDocuments = Documents(querySnapshot.docs);
+    console.log("全てのドキュメント (本):", allDocuments);
+
+    // a_isbn13 が inputIsbn13 と一致するドキュメントをフィルタリング
+    const filteredDocuments = allDocuments.filter(doc => {
+      // doc.data.a_isbn13 が文字列としてinputIsbn13と一致するかを確認
+      // 必要に応じて型変換（例: String()）を行うとより安全です
+      return String(doc.data.a_isbn13) === String(inputIsbn13);
+    });
+
+    console.log("フィルタリングされたドキュメント (本):", filteredDocuments);
+
+    // フィルタリングされたドキュメントを使って表示を更新
+    const elements = bookElements(filteredDocuments);
+    $("#book_condition").html(elements);
+
+  });
+
+
+ onSnapshot(collection(db, "lending"), (querySnapshot) => {
+    console.log(querySnapshot.docs);
+
+    const allDocuments = Documents(querySnapshot.docs);
+    console.log(allDocuments);
+
+    // a_isbn13 が inputIsbn13 と一致するドキュメントをフィルタリング
+    const filteredDocuments = allDocuments.filter(doc => {
+      // doc.data.a_isbn13 が文字列としてinputIsbn13と一致するかを確認
+      // 必要に応じて型変換（例: String()）を行うとより安全です
+      return String(doc.data.a_isbn13) === String(inputIsbn13);
+    });
+
+    const elements = returnElements(filteredDocuments);
+    $("#return_display").html(elements);
+
+    });
+
+});
+
+
+
+
+
+
+  document.getElementById('button_register').addEventListener('click', async () => {
+    const isbn13ToDelete = document.getElementById('a_isbn13').value;
+
+    if (!isbn13ToDelete) {
+        alert("削除するa_isbn13を入力してください。");
+        return;
+    }
+
+    try {
+        // 'lending' コレクションへの参照を取得
+        const lendingCollectionRef = collection(db, "lending");
+
+        // a_isbn13が指定された値と一致するドキュメントを検索するクエリを作成
+        const q = query(lendingCollectionRef, where("a_isbn13", "==", isbn13ToDelete));
+
+        // クエリを実行して、一致するドキュメントを取得
+        const querySnapshot = await getDocs(q);
+
+        // 一致するドキュメントがない場合
+        if (querySnapshot.empty) {
+            alert(`a_isbn13が ${isbn13ToDelete} のドキュメントは見つかりませんでした。`);
+            return;
+        }
+
+        // 取得したドキュメントをループして削除
+        querySnapshot.forEach(async (doc) => {
+            await deleteDoc(doc.ref); // doc.ref はドキュメントの参照（DocumentReference）
+            console.log(`Document with ID ${doc.id} (a_isbn13: ${isbn13ToDelete}) successfully deleted.`);
+        });
+
+        alert(`a_isbn13が ${isbn13ToDelete} のドキュメントが正常に削除されました。`);
+
+    } catch (error) {
+        console.error("ドキュメントの削除中にエラーが発生しました: ", error);
+        alert("ドキュメントの削除中にエラーが発生しました。詳細はコンソールを確認してください。");
+    }
+
+$("#a_isbn13").val("");
+$("#book_condition").html("");
+$("#return_display").html("");
+
+alert("返却登録しました");
+
+});
+
+
+
+
+
+
+
+</script>
+
+
+
+
+</body>
+</html>
+
+
+

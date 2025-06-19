@@ -1,0 +1,150 @@
+body {
+    font-family: 'Zen Maru Gothic', sans-serif;
+    width: 90%;
+    height: 90%;
+    margin: 0 auto;
+}
+
+h2 {
+  position: relative;
+  margin: 15px 0 30px 0;
+  padding: 10px 20px 10px 68px;
+  word-break: break-all;
+  border-top: 3px solid #444444;
+  border-radius: 12px 0 0 0;
+  font-size: 30px;
+}
+
+h2 span {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: block;
+  height:3.5rem;
+  padding: 0 20px;
+  color: #fff;
+  border-radius: 10px 0 15px 15px;
+  background: #444444;
+}
+
+#a_isbn13{
+  width : 120px;
+}
+
+#display{
+  font-size: 10px;
+}
+
+.explanation{
+  margin-top: 10px;
+  margin-left: 20px;
+  font-size: 13px;
+}
+
+#book_detail{
+  margin-top: 40px;
+  display: flex;
+  justify-content: space-around;
+
+}
+
+#book_calligraphy{
+  width: 20%;
+  height: 300px;
+  border-right: 1px solid lightgray;
+  border-bottom:1px solid lightgray;
+  text-align: center;
+}
+
+#book_info{
+  width: 45%;
+  height: 400px;
+}
+
+#book_localinfo{
+  width: 30%;
+  height: 400px;
+}
+
+#book_localinfo > div {
+    display: flex; /* flexboxを使って子要素（labelとinput/select/textarea）を横並びにする */
+    align-items: center; /* 縦方向の中央揃え */
+    margin-bottom: 25px; /* 各行の下に余白を追加して、行間を空ける */
+}
+
+#book_localinfo label {
+    width: 100px; /* ラベルの幅を固定して、縦に揃える */
+    text-align: left; /* ラベルのテキストを左揃えにする */
+    margin-right: 10px; /* ラベルと入力部分の間に余白を追加 */
+    flex-shrink: 0; /* ラベルの幅が縮まないようにする */
+    font-weight:bold ;
+}
+
+#book_localinfo textarea {
+    width: 300px; /* textareaの縦方向のみサイズ変更を許可 */
+}
+
+
+
+table {
+    width: 90%;
+    margin: 0 auto;
+    border-collapse: collapse;
+    background-color: #fff;
+}
+
+th, td {
+    padding: 12px 15px;
+    border: 1px solid #ddd;
+    text-align: left;
+}
+
+
+tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+td:first-child {
+    font-weight: bold;
+    width: 30%; /* 1列目の幅を調整 */
+}
+
+#button_register {
+    background: #eee;
+    margin-right: 20%;
+    float: right;
+    position: relative;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    width: 100px;
+    padding: 10px 25px;
+    color: #313131;
+    transition: 0.3s ease-in-out;
+    font-weight: 500;
+}
+
+#button_register::before {
+  content: '';
+  position: absolute;
+  top: -4px;
+  left: -4px;
+  width: calc(100% - 3px);
+  height: calc(100% - 3px);
+  border: 2px solid gray;
+  transition: 0.2s;
+}
+
+#button_register:hover::before {
+  top: 0;
+  left: 0;
+}
+
+#button_register:hover {
+  text-decoration: none;
+  background-color: lightgray;
+}
+
+
+
+

@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>もろシス　本の新規登録</title>
+    <link rel="stylesheet" href="css/reset.css">
+    <link rel="stylesheet" href="css/stylesub3.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700&display=swap" rel="stylesheet"> 
+</head>
+<body>
+
+<h2><span></span>本の新規登録</h2>
+
+<div>
+  <label for="a_isbn13">本のバーコードを読み込んでください: </label><input type="text" inputmode="numeric" pattern="^[0-9]+$"  id="a_isbn13">
+  <button id="display">表示します</button>
+  <p class="explanation">読み取るバーコードは９７８からはじまるISBNです。</p>
+  <p class="explanation">バーコードの情報を利用して、国会図書館などから書籍情報を取得します。</p>
+  <p class="explanation">所蔵日・所蔵場所・備考を入力して、下のボタンから登録してください。 </p>
+</div>  
+
+
+<!-- 3つのdivをflexboxで横並び -->
+
+<div id="book_detail">
+  <div id="book_calligraphy">
+    <img id="bookcover" alt="" src="">
+  </div>
+
+  <div id="book_info">
+    <table id="book_table1">
+        <tbody>
+            <tr>
+                <td>タイトル</td>
+                <td id="b_booktitle"></td>
+            </tr>
+            <tr>
+                <td>著者</td>
+                <td id="c_bookauthor"></td>
+            </tr>
+            <tr>
+                <td>出版社</td>
+                <td id="d_bookpublisher"></td>
+            </tr>
+            <tr>
+                <td>出版年</td>
+                <td id="e_bookpublicationyear"></td>
+            </tr>
+            <tr>
+                <td>NDC</td>
+                <td id="f_bookndv"></td>
+            </tr>
+            <tr>
+                <td>ページ数</td>
+                <td id="g_bookpagecount"></td>
+            </tr>
+        </tbody>
+    </table>
+  </div>
+
+  <div id="book_localinfo">
+    <div>
+      <label for="h_arrivalday">所蔵した日: </label><input type="date" id="h_arrivalday">
+    </div>
+    <div>    
+      <label for="i_place">所蔵場所: </label>
+      <select id="i_place">
+        <option value="1階入口">1階入口</option>
+        <option value="1階奥">1階奥</option>
+        <option value="2階">2階</option>
+      </select></div>
+    <div>
+      <label for="j_detail">備考: </label><textarea rows="6" id="j_detail"></textarea>
+    </div>
+  </div>
+</div>
+
+
+<!-- 登録完了ボタン -->
+ <div id="button_register">
+	登録します！
+</div>
+
+
+
+
+    
+
+
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+<!-- axiosを使えるようにする -->
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+
+<script type="module">
+  // Import the functions you need from the SDKs you need
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.9.1/firebase-app.js";
+  // TODO: Add SDKs for Firebase products that you want to use
+  // https://firebase.google.com/docs/web/setup#available-libraries
+
+  import {
+  getFirestore,
+  collection,
+  addDoc,
+  serverTimestamp,
+} from "https://www.gstatic.com/firebasejs/11.9.1/firebase-firestore.js";
+
+
+  // Your web app's Firebase configuration
+  const firebaseConfig = {
+    
+    authDomain: "librarysystem20250619.firebaseapp.com",
+    projectId: "librarysystem20250619",
+    storageBucket: "librarysystem20250619.firebasestorage.app",
+    messagingSenderId: "192501400015",
+    appId: "1:192501400015:web:6ff338b2079e4564da52ba"
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+
+  const db = getFirestore(app);
+
+
+
+
+
+
+//  ページ開いたらカーソルが合うように
+ $(document).ready(function() {
+   $('#a_isbn13').focus();
+ });
+
+
+ 
+//  ISBNを入力したら、書影を表示
+ $(document).ready(function() {
+            $('#display').on('click', function() {
+                const isbn13Value = $('#a_isbn13').val(); // 入力された値を取得
+
+                if (isbn13Value) { // 値が存在する場合のみ処理を実行
+                    $('#bookcover').attr('src', "https://ndlsearch.ndl.go.jp/thumbnail/" + isbn13Value + ".jpg");
+                } else {
+                    $('#bookcover').attr('src', ""); // ISBN13が空になったら画像をクリア
+                }
+            });
+        });
+
+  
+  // ISBNを入力したら、各情報を表示
+
+
+   $('#display').on('click', function() {
+    const isbn13Value2 = $('#a_isbn13').val(); // 入力された値を取得
+
+    // 入力値が空でない場合にのみAPIを叩くなどのチェックを入れるとより良いでしょう
+    if (isbn13Value2) { // 例: 入力値がある場合のみ実行
+        // const url = "https://ndlsearch.ndl.go.jp/api/sru?operation=searchRetrieve&query=isbn=" + isbn13Value2;
+         // const url = "https://ndlsearch.ndl.go.jp/api/openurl?isbn="+ isbn13Value2;
+
+              const url = "https://ndlsearch.ndl.go.jp/api/opensearch?isbn=" + isbn13Value2;
+
+          axios
+            .get(url)
+            .then(function (response) {
+              const parser = new DOMParser();
+              const xmlDoc = parser.parseFromString(response.data, "application/xml");
+
+              console.log(xmlDoc)
+
+              const item = xmlDoc.getElementsByTagName("item")[0];
+              if (!item) {
+                console.log("該当する書誌データが見つかりませんでした。");
+                return;
+              }
+
+              // タグ取得用関数（名前空間を使わず取得）
+              const getTagText = (tag) => {
+                const el = item.getElementsByTagName(tag)[0];
+                return el ? el.textContent : "";
+              };
+
+              const title = getTagText("title");
+              const author = getTagText("dc:creator");
+              const publisher = getTagText("dc:publisher");
+              const pubDate = getTagText("dcterms:issued");
+              
+              const ndc10 = (() => {
+                            const subjects = item.getElementsByTagName("dc:subject");
+                            for (let i = 0; i < subjects.length; i++) {
+                              const el = subjects[i];
+                              if (el.getAttribute("xsi:type") === "dcndl:NDC10") {
+                                return el.textContent;
+                              }
+                            }
+                            return "";
+                          })();
+
+              const format = getTagText("dc:extent");
+
+              console.log("タイトル:", title);
+              console.log("著者:", author);
+              console.log("出版社:", publisher);
+              console.log("出版年:", pubDate);
+              console.log("NDC10:", ndc10);
+              console.log("ページ数:", format);
+
+              $('#b_booktitle').text(title);
+              $('#c_bookauthor').text(author);
+              $('#d_bookpublisher').text(publisher);
+              $('#e_bookpublicationyear').text(pubDate);
+              $('#f_bookndv').text(ndc10);
+              $('#g_bookpagecount').text(format);              
+
+
+            })
+            .catch(function (error) {
+              console.error("エラーが発生しました:", error);
+            });
+    }
+});
+
+
+
+$("#button_register").on("click", function () {
+  // 送信時に必要な処理
+
+const postData = {
+  a_isbn13: $("#a_isbn13").val(),
+  b_booktitle: $("#b_booktitle").text(),
+  c_bookauthor: $("#c_bookauthor").text(),
+  d_bookpublisher: $("#d_bookpublisher").text(),
+  e_bookpublicationyear: $("#e_bookpublicationyear").text(),
+  f_bookndv: $("#f_bookndv").text(),
+  g_bookpagecount: $("#g_bookpagecount").text(),
+  h_arrivalday: $("#h_arrivalday").val(),
+  i_place: $("#i_place").val(),
+  j_detail: $("#j_detail").val(),
+  k_lastperson:"貸し出された記録なし"
+};
+
+addDoc(collection(db, "book"), postData);
+
+
+// 入力データをクリア
+$("#a_isbn13").val("");
+
+$("#b_booktitle").text("");
+$("#c_bookauthor").text("");
+$("#d_bookpublisher").text("");
+$("#e_bookpublicationyear").text("");
+$("#f_bookndv").text("");
+$("#g_bookpagecount").text("");
+$("#h_arrivalday").val("");
+$("#i_place").val("");
+$("#j_detail").val("");
+
+$('#bookcover').attr('src', "");
+
+alert("登録しました");
+
+});
+
+
+
+
+
+
+
+
+</script>
+
+
+
+
+
+
+</body>
+</html>

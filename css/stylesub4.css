@@ -1,0 +1,102 @@
+body {
+    font-family: 'Zen Maru Gothic', sans-serif;
+    width: 90%;
+    height: 90%;
+    margin: 0 auto;
+}
+
+h2 {
+  position: relative;
+  margin: 15px 0 30px 0;
+  padding: 10px 20px 10px 68px;
+  word-break: break-all;
+  border-top: 3px solid #444444;
+  border-radius: 12px 0 0 0;
+  font-size: 30px;
+}
+
+h2 span {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: block;
+  height:3.5rem;
+  padding: 0 20px;
+  color: #fff;
+  border-radius: 10px 0 15px 15px;
+  background: #444444;
+}
+
+
+#person_form {
+    height: 150px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    align-items: flex-start; /* 全体の位置合わせは維持 */
+    margin-bottom: 50px;
+}
+
+#person_form > div { /* 各入力行のdiv */
+    display: flex; /* ここをFlexboxコンテナにする */
+    align-items: center; /* ラベルと入力フィールドを垂直方向中央に揃える */
+    /* gap: 10px; モダンブラウザで要素間の間隔を調整したい場合に有効です */
+}
+
+#person_form label {
+    flex-shrink: 0; /* ラベルが縮まないようにする */
+    width: 280px; /* ラベルの幅を固定して揃える */
+    margin-right: 10px; /* ラベルと入力フィールドの間に隙間を作る */
+    text-align: right; /* ラベルのテキストを右寄せにして、入力フィールドとの間にスペースを作る */
+}
+
+#person_form input[type="text"] {
+    flex-grow: 1; /* 入力フィールドが残りのスペースを埋めるようにする */
+    max-width: 300px; /* 必要に応じて最大幅を設定 */
+}
+
+
+p {
+  margin-top: 15px;
+}
+
+
+
+#button_register {
+    background: #eee;
+    margin-left: 300px;
+    position: relative;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    width: 100px;
+    padding: 10px 25px;
+    color: #313131;
+    transition: 0.3s ease-in-out;
+    font-weight: 500;
+}
+
+#button_register::before {
+  content: '';
+  position: absolute;
+  top: -4px;
+  left: -4px;
+  width: calc(100% - 3px);
+  height: calc(100% - 3px);
+  border: 2px solid gray;
+  transition: 0.2s;
+}
+
+#button_register:hover::before {
+  top: 0;
+  left: 0;
+}
+
+#button_register:hover {
+  text-decoration: none;
+  background-color: lightgray;
+}
+
+
+
+
